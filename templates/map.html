@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script> var passvalues = [ {{ path}} ]; </script>
+
+<canvas id="satview" width="440" height="440" style="border:1px solid #d3d3d3;"></canvas>
+
+<script src="/static/drawmap.js"></script>
+
+<script>
+
+var ctx = document.getElementById("satview").getContext("2d");
+drawMap(ctx);
+drawPass(ctx, passvalues);
+
+</script> 
+
+</body>
+</html>
+
