@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import sqlite3
+import sys
 
 
-data = open('satellites.csv').read().splitlines()
+data = open(sys.argv[1]).read().splitlines()
 
 conn = sqlite3.connect('predict.db')
 cur = conn.cursor()
