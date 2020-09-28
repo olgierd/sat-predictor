@@ -6,7 +6,6 @@ import time
 import predict
 from datetime import datetime
 from dateutil import tz
-import os
 
 app = Flask(__name__)
 

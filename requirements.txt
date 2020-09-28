@@ -1,0 +1,5 @@
+requests
+ephem
+flask
+pysqlite3
+gunicorn
