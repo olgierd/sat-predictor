@@ -26,6 +26,37 @@ def stamp_to_localtime(stamp):
     return ts.astimezone(tz.gettz('Europe/Warsaw')).strftime("%H:%M")
 
 
+def perform_filtering(data, fs, ssb_only, fm_only):
+    filter_include = None
+    filter_exclude = None
+
+    if fs:
+        filter_include = [q for q in fs.split(',') if q[0] != '-']
+        filter_exclude = [q[1:] for q in fs.split(',') if q[0] == '-']
+
+    filtered = []
+
+    for x in data:
+        if ssb_only and ssb_only == '1' and x[12] != '1':
+            continue
+
+        if fm_only and fm_only == '1' and x[11] != '1':
+            continue
+
+        if filter_exclude and any([fe in x[0] for fe in filter_exclude]):
+            continue
+
+        if filter_include:
+            if any([fi in x[0] for fi in filter_include]):
+                filtered.append(x)
+            else:
+                continue
+
+        filtered.append(x)
+
+    return filtered
+
+
 @app.route('/')
 @app.route('/<locator>')
 def home(locator="JO82"):
@@ -34,12 +65,14 @@ def home(locator="JO82"):
         return "<pre>Nieprawidłowy lokator.</pre>"
 
     pr = predict.Predictor()
-
-    output = u"<pre>Następne przeloty [" + locator + "]:\n\n</pre>"
-
     data = pr.get_passes_for_locator(locator, 50)
+
+    data = perform_filtering(data, request.args.get('f'), request.args.get("ssb_only"), request.args.get("fm_only"))
+
     cnt = 0
     lines = []
+    output = u"<pre>Następne przeloty [" + locator + "]:\n\n"
+    output = output + "</pre>"
 
     for x in data:
         curTime = "    NOW!" if time.time() > x[1] else "za %02d:%02d" % ((int(x[1]-time.time())/3600), int((x[1]-time.time())/60) % 60)
@@ -53,8 +86,8 @@ def home(locator="JO82"):
         line = f"""<pre onclick="show({cnt});"><b>{x[0]:14}</b>↑{stamp_to_localtime(x[1])} ↓{stamp_to_localtime(x[5])} ({passLen}) {curTime}"""
         line = line + f"""   max el: <b>{x[4]:2}</b> az: {passDirection}</pre>"""
         line = line + f"""<div id="d{cnt}" style='display:none;'><pre class='details'>"""
-        line = line + f"""    Downlink: {x[8]} | Uplink: {x[7]} | Beacon: {x[9]}</pre></div>"""
-        # line = line + f"""    Downlink: {x[8]} | Uplink: {x[7]} | Beacon: {x[9]} {maplink} </pre></div>"""
+        line = line + f"""    Downlink: {x[8]} | Uplink: {x[7]}""" + (f""" | Beacon: {x[9]}""" if x[9] else "")
+        line = line + """</pre></div>"""
 
         lines.append(line)
 

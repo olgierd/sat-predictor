@@ -82,7 +82,7 @@ class Predictor:
             new_pass = []
             for x in range(0, 6, 2):
                 new_pass.append(calendar.timegm(cur_pass[x].datetime().timetuple()))
-                new_pass.append(int(cur_pass[x+1]/ephem.degree))
+                new_pass.append(int(cur_pass[x+1]/ephem.degree+0.5))
             new_pass.append(self.middle_point(new_pass[1], new_pass[5]))
             passes.append(new_pass)
             obs.date = cur_pass[4] + ephem.minute*5
@@ -114,7 +114,7 @@ class Predictor:
             self.update_locator(locator)
             print("Regenerating for", locator, "Elapsed [ms]:", round((time.time()-start)*1000))
 
-        data = self.conn.execute("select sat, aos_time, aos_az, peak_time, peak_el, los_time, los_az, uplink, downlink, beacon, peak_az \
+        data = self.conn.execute("select sat, aos_time, aos_az, peak_time, peak_el, los_time, los_az, uplink, downlink, beacon, peak_az, fm, linear \
                          from passes p left join satellites s \
                          on p.sat = s.name \
                          where loc = ? and los_time > ?\
