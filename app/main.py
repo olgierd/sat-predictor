@@ -6,6 +6,7 @@ import time
 import predict
 from datetime import datetime
 from dateutil import tz
+import json
 
 
 app = Flask(__name__)
@@ -85,7 +86,7 @@ def home(locator="JO82"):
         line = f"""<pre onclick="show({cnt});"><b>{x[0]:14}</b>↑{stamp_to_localtime(x[1])} ↓{stamp_to_localtime(x[5])} ({passLen}) {curTime}"""
         line = line + f"""   max el: <b>{x[4]:2}</b> az: {passDirection}"""
         line = line + f"""  <b class="details" sat="{x[0]}"></b></pre>\n"""
-        line = line + f"""<div id="d{cnt}" style='display:none;'><pre class='details'>"""
+        line = line + f"""<div id="d{cnt}" style='display:none;'><pre class='sat_details'>"""
         line = line + f"""    Downlink: {x[8]} | Uplink: {x[7]}""" + (f""" | Beacon: {x[9]}""" if x[9] else "")
         line = line + """</pre></div>\n"""
 
@@ -107,9 +108,13 @@ def map():
 @app.route('/current')
 def current():
     pr = predict.Predictor()
-    sat = request.args.get('sat')
+    sats = json.loads(request.args.get('sats'))
     loc = request.args.get('loc')
-    return pr.get_current_elaz(sat, loc)
+    print(sats)
+    response = {}
+    for sat in sats:
+        response[sat] = pr.get_current_elaz(sat, loc)
+    return json.dumps(response)
 
 
 @app.route('/favicon.ico')
