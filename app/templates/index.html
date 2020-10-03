@@ -44,6 +44,38 @@ function openmap(params, line) {
 
 }
 
+function get_az_letter(az) {
+  directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return directions[Math.floor(((az + 22.5)%360)/45)];
+}
+
+function update_position(id) {
+  det = document.getElementsByClassName('details');
+  sat = det[id].getAttribute('sat');
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4){
+      el = JSON.parse(xhr.responseText)["el"];
+      az = JSON.parse(xhr.responseText)["az"];
+      if(el>0) { det[id].innerHTML = "↑" + el + "° ↔" + az + "° [" + get_az_letter(az) + "]"; }
+      else { det[id].innerHTML = ""; }
+
+    }
+  };
+  xhr.open('GET', '/current?sat='+sat+'&loc=JO82');
+  xhr.send();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  update_positions();
+});
+
+function update_positions() {
+  update_position(0);
+}
+
+window.setInterval(checkxw, 1000);
+
 </script>
 
     <head>

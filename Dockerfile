@@ -1,8 +1,8 @@
-FROM debian:stable
+FROM python:3.7
 
 COPY . /sat
 
-RUN apt update && apt -y install python3 python3-pip && pip3 install -r /sat/requirements.txt && apt clean && apt autoclean
+RUN pip3 install -r /sat/requirements.txt
 
 EXPOSE 7138
 

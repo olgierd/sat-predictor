@@ -8,6 +8,7 @@ import time
 import requests
 import sqlite3
 import calendar
+import json
 
 
 class Predictor:
@@ -17,7 +18,10 @@ class Predictor:
         self.update_tle()
         self.all_tle = open(self.TLEFILE, 'r').read().splitlines()
         self.refreshlimit = 60*60
-        self.conn = sqlite3.connect(self.DBFILE)
+
+    def init_db(self):
+        if not hasattr(self, 'conn'):
+            self.conn = sqlite3.connect(self.DBFILE)
 
     def update_tle(self):
         if not os.path.isfile(self.TLEFILE) or (time.time()-os.path.getctime(self.TLEFILE)) > 60*60*24*3:
@@ -41,7 +45,6 @@ class Predictor:
         raise Exception(f"Whoa, no satellite found! {sat_name}")
 
     def get_current_elaz(self, satellite, locator):
-        beg = time.time()
         lat, lon = GridToCoords().get(locator)
         obs = ephem.Observer()
         obs.lat, obs.lon = lat * ephem.degree, lon * ephem.degree
@@ -50,7 +53,10 @@ class Predictor:
         satellite = ephem.readtle(raw_tle[0], raw_tle[1], raw_tle[2])
         satellite.compute(obs)
 
-        return str([satellite.alt/ephem.degree, satellite.az/ephem.degree, time.time()-beg])
+        out = {}
+        out["el"] = round(satellite.alt/ephem.degree, 1)
+        out["az"] = round(satellite.az/ephem.degree, 1)
+        return json.dumps(out)
 
     def get_current_elaz_many(self, satellites, locator):
         lat, lon = GridToCoords().get(locator)
@@ -90,7 +96,7 @@ class Predictor:
         return passes
 
     def update_locator(self, locator):
-
+        self.init_db()
         self.update_tle()
         satellites = [x[0] for x in self.conn.execute('select name from satellites')]
 
@@ -104,7 +110,7 @@ class Predictor:
         self.conn.commit()
 
     def get_passes_for_locator(self, locator, limit):
-
+        self.init_db()
         oldestrecord = self.conn.execute("select gen_time from passes \
             where loc = ?\
             order by gen_time asc limit 1", [locator]).fetchone()
@@ -121,11 +127,3 @@ class Predictor:
                          order by aos_time limit ?", [locator, int(time.time()), limit])
 
         return data
-
-    def get_ssb_sats(self):
-        data = self.conn.execute("select name from satellites where linear = '1'").fetchall()
-        return [x[0] for x in data]
-
-    def get_fm_sats(self):
-        data = self.conn.execute("select name from satellites where fm = '1'").fetchall()
-        return [x[0] for x in data]
