@@ -44,11 +44,6 @@ function openmap(params, line) {
 
 }
 
-function get_az_letter(az) {
-  directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  return directions[Math.floor(((az + 22.5)%360)/45)];
-}
-
 function update_positions() {
   det = document.getElementsByClassName('details');
   sats = [];
@@ -61,13 +56,7 @@ function update_positions() {
       resp = JSON.parse(xhr.responseText);
       for (i = 0; i < 5; i++) {
         sat_name = det[i].getAttribute('sat');
-        sat_pos = JSON.parse(resp[sat_name]);
-        console.log(sat_pos);
-        el = sat_pos["el"];
-        az = sat_pos["az"];
-        console.log([el, az]);
-        if(el>0) { det[i].innerHTML = "↑" + el + "° ↔" + az + "° [" + get_az_letter(az) + "]"; }
-        else { det[i].innerHTML = ""; }
+        det[i].innerHTML = resp[sat_name];
       }
 
     }
@@ -80,9 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
   update_positions();
 });
 
-
-
-window.setInterval(update_positions, 1000);
+window.setInterval(update_positions, 5000);
 
 </script>
 

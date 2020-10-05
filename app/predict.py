@@ -56,7 +56,7 @@ class Predictor:
         out = {}
         out["el"] = round(satellite.alt/ephem.degree, 1)
         out["az"] = round(satellite.az/ephem.degree, 1)
-        return json.dumps(out)
+        return out
 
     def get_current_elaz_many(self, satellites, locator):
         lat, lon = GridToCoords().get(locator)
@@ -120,7 +120,7 @@ class Predictor:
             self.update_locator(locator)
             print("Regenerating for", locator, "Elapsed [ms]:", round((time.time()-start)*1000))
 
-        data = self.conn.execute("select sat, aos_time, aos_az, peak_time, peak_el, los_time, los_az, uplink, downlink, beacon, peak_az, fm, linear \
+        data = self.conn.execute("select sat, aos_time, aos_az, peak_time, peak_el, los_time, los_az, uplink, downlink, beacon, peak_az, mode \
                          from passes p left join satellites s \
                          on p.sat = s.name \
                          where loc = ? and los_time > ?\
