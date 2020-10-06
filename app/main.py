@@ -139,7 +139,6 @@ def current():
     pr = predict.Predictor()
     sats = json.loads(request.args.get('sats'))
     loc = request.args.get('loc')
-    print(sats)
     response = {}
     for sat in sats:
         data = pr.get_current_elaz(sat, loc)
