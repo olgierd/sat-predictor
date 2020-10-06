@@ -75,9 +75,7 @@ def home(locator="JO82"):
 
     client_ip = request.headers.get('X-Forwarded-For:')
     if client_ip:
-        print(client_ip)
-    else:
-        print("Strange - no IP header")
+        print(client_ip, flush=True)
 
     if locator not in locators:
         return "<pre>Nieprawidłowy lokator.</pre>"
