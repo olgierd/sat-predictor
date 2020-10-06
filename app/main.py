@@ -73,9 +73,11 @@ def argtoggle(param, value):
 @app.route('/<locator>')
 def home(locator="JO82"):
 
-    client_ip = request.headers.get('X-Client-IP')
+    client_ip = request.headers.get('X-Forwarded-For:')
     if client_ip:
-        print(client_ip, request.headers.get('User-Agent'))
+        print(client_ip)
+    else:
+        print("Strange - no IP header")
 
     if locator not in locators:
         return "<pre>Nieprawidłowy lokator.</pre>"
@@ -114,7 +116,6 @@ def home(locator="JO82"):
         lines.append(line)
 
         cnt = cnt + 1
-
 
     # lines.append("<input type='text'></input>")
 
