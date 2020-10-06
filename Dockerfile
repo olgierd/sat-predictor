@@ -1,8 +1,10 @@
 FROM python:3.7
 
-COPY . /sat
+COPY requirements.txt /sat/requirements.txt
 
 RUN pip3 install -r /sat/requirements.txt
+
+COPY . /sat
 
 EXPOSE 7138
 
