@@ -7,18 +7,11 @@ import predict
 from datetime import datetime
 from dateutil import tz
 import json
+from gridtogps import GridToCoords
 
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
-
-locators = ["JO74", "JO84", "JO94", "KO04", "KO14",
-            "JO73", "JO83", "JO93", "KO03", "KO13",
-            "JO72", "JO82", "JO92", "KO02", "KO12",
-            "JO71", "JO81", "JO91", "KO01", "KO11",
-            "JO70", "JO80", "JO90", "KO00", "KO10",
-            "JN79", "JN89", "JN99", "KN09", "KN19",
-            "JO59"]
+# app.config['DEBUG'] = True
 
 
 def stamp_to_localtime(stamp):
@@ -59,6 +52,18 @@ def perform_filtering(data, fs, only):
     return filtered
 
 
+def checkLocator(loc):
+    gtc = GridToCoords()
+    try:
+        p = gtc.get(loc)
+        if p != [0, 0]:
+            return True
+        else:
+            return False
+    except Exception:
+        return False
+
+
 def argtoggle(param, value):
     q = {}
     for k, v in request.args.items():
@@ -77,10 +82,11 @@ def home(locator="JO82"):
     if client_ip:
         print(client_ip, flush=True)
 
-    if locator not in locators:
+    pr = predict.Predictor()
+
+    if not checkLocator(locator):
         return "<pre>Nieprawidłowy lokator.</pre>"
 
-    pr = predict.Predictor()
     data = pr.get_passes_for_locator(locator, 50)
 
     only = request.args.get("only")
