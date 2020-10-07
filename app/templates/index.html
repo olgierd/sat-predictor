@@ -8,8 +8,6 @@ pre:hover { background-color: #dddddd }
 .details { margin: 5 0 5 0; font-weight: bold; }
 </style>
 
-<script src="{{ url_for('static', filename='drawmap.js') }}"></script>
-
 <script>
 function show(line) {
   var x = document.getElementById("d" + line);
@@ -17,31 +15,6 @@ function show(line) {
 	   x.style.display = "block";
   }
   else { x.style.display = "none"; }
-}
-
-function createCanvas(cid) {
-        var canvas = document.createElement('canvas');
-        canvas.id = cid;
-        canvas.width = 440;
-        canvas.height = 440;
-        canvas.style.border = "border:1px solid;";
-        return canvas;
-}
-
-
-function openmap(params, line) {
-        divel = document.getElementById("d"+line);
-        if(divel.childElementCount == 1) {
-                canvas = createCanvas("can"+line);
-                ctx = canvas.getContext("2d");
-		draw(ctx, params);
-                divel.appendChild(canvas);
-        }
-        else {
-                document.getElementById("can"+line).remove()
-
-        }
-
 }
 
 function update_positions() {
