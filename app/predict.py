@@ -8,7 +8,6 @@ import time
 import requests
 import sqlite3
 import calendar
-import json
 
 
 class Predictor:
@@ -25,7 +24,6 @@ class Predictor:
 
     def update_tle(self):
         if not os.path.isfile(self.TLEFILE) or (time.time()-os.path.getctime(self.TLEFILE)) > 60*60*24*3:
-            print("Fetching new TLE")
             f = open(self.TLEFILE, "w")
             f.write(requests.get("http://www.amsat.org/amsat/ftp/keps/current/nasabare.txt").text+"\n")
             f.write(requests.get("http://celestrak.com/NORAD/elements/tle-new.txt").text)

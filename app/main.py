@@ -80,7 +80,7 @@ def home(locator="JO82"):
 
     client_ip = request.headers.get('X-Forwarded-For')
     if client_ip:
-        print(datetime.now().isoformat(), client_ip, flush=True)
+        print(datetime.now().isoformat(), locator, client_ip, flush=True)
 
     pr = predict.Predictor()
 
