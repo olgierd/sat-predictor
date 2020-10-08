@@ -11,8 +11,6 @@ from gridtogps import GridToCoords
 
 
 app = Flask(__name__)
-# app.config['DEBUG'] = True
-
 
 def stamp_to_localtime(stamp):
     ts = datetime.utcfromtimestamp(stamp).replace(tzinfo=tz.tzutc())
@@ -139,6 +137,10 @@ def get_az_letter(az):
     return directions[int(((az + 22.5) % 360)/45)]
 
 
+def get_doppler_100m(v):
+    return round(100e6 * (-v / 300e6))
+
+
 @app.route('/current')
 def current():
     pr = predict.Predictor()
@@ -158,4 +160,5 @@ def favicon():
 
 
 if __name__ == "__main__":
+    app.config['DEBUG'] = True
     app.run()

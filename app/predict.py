@@ -54,6 +54,9 @@ class Predictor:
         out = {}
         out["el"] = round(satellite.alt/ephem.degree, 1)
         out["az"] = round(satellite.az/ephem.degree, 1)
+        out["range"] = round(satellite.range/1000)
+        out["range_vel"] = round(satellite.range_velocity/1)
+
         return out
 
     def get_current_elaz_many(self, satellites, locator):
