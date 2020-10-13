@@ -41,11 +41,12 @@ def perform_filtering(data, fs, only):
 
         if filter_include:
             if any([fi in x[0] for fi in filter_include]):
-                filtered.append(x)
+                pass
             else:
                 continue
 
         filtered.append(x)
+
 
     return filtered
 
