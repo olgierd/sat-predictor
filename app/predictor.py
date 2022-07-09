@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from gridtogps import GridToCoords
 import predict
 import requests
 import time
 import yaml
+from datetime import datetime
+from gridtogps import GridToCoords
 
 
 class Predictor:
@@ -61,6 +62,10 @@ class Predictor:
             tr['start'] = t.start
             tr['end'] = t.start + t.duration()
             tr['duration'] = t.duration()
+
+            tr['start_str'] = datetime.fromtimestamp(tr['start']).strftime("%H:%M")
+            tr['duration_str'] = datetime.fromtimestamp(tr['duration']).strftime("%N:%S")
+            tr['end_str'] = datetime.fromtimestamp(tr['end']).strftime("%H:%M")
 
             tr['el_max'] = round(t.peak()['elevation'])
             tr['az_rise'] = round(t.at(t.start)['azimuth'])
