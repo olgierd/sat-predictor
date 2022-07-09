@@ -64,7 +64,7 @@ class Predictor:
             tr['duration'] = t.duration()
 
             tr['start_str'] = datetime.fromtimestamp(tr['start']).strftime("%H:%M")
-            tr['duration_str'] = datetime.fromtimestamp(tr['duration']).strftime("%N:%S")
+            tr['duration_str'] = datetime.fromtimestamp(tr['duration']).strftime("%M:%S")
             tr['end_str'] = datetime.fromtimestamp(tr['end']).strftime("%H:%M")
 
             tr['el_max'] = round(t.peak()['elevation'])
