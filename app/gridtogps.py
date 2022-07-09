@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 class GridToCoords:
     def get(self, grid):
@@ -31,4 +31,4 @@ class GridToCoords:
         lat = lat - 90
         lon = lon - 180
 
-        return [lat, lon]
+        return [lat, -lon, 100]
