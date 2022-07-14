@@ -5,6 +5,7 @@ import predict
 import requests
 import time
 import yaml
+from bs4 import BeautifulSoup
 from datetime import datetime
 from gridtogps import GridToCoords
 
@@ -22,11 +23,12 @@ class Predictor:
         self.cache_ages = {}
         self.cache_max_age = 60*60      # 1 hour
 
+        self.amsat_status_cache = {}
+        self.amsat_status_last_update = -1
+        self.amsat_status_max_age = 60*60*6     # 6 hours
+
         with open("satellites.yaml", 'r') as f:
             self.sats = yaml.safe_load(f)
-
-    def get_sats(self):
-        return self.sats
 
     def get_current_el_az(self, sat_name, qth):
         qth = GridToCoords().get(qth)
@@ -34,13 +36,16 @@ class Predictor:
         return [csd['elevation'], csd['azimuth']]
 
     def get_all_for_loc(self, qth, n):
+        self.update_tle()
+        self.update_amsat_status()
+
         if qth in self.cache and qth in self.cache_ages and time.time() - self.cache_ages[qth] < self.cache_max_age:
             # cache hit, return from buffer
             buf = [q for q in self.cache[qth] if q['end'] > time.time()]
 
         else:   # not in cache
             buf = []
-            for sat in self.get_sats().keys():
+            for sat in self.sats.keys():
                 passes = self.get_next_passes(sat, qth, n)
                 buf.extend(passes)
 
@@ -55,7 +60,7 @@ class Predictor:
             if sat_pass['remaining'] > 0:
                 sat_pass['remaining_str'] = datetime.utcfromtimestamp(sat_pass['remaining']).strftime("%H:%M")
             else:
-                sat_pass['remaining_str'] = "NOW"
+                sat_pass['remaining_str'] = "NOW!"
 
         return buf
 
@@ -85,14 +90,32 @@ class Predictor:
             tr['az_rise'] = round(t.at(t.start)['azimuth'])
             tr['az_peak'] = round(t.peak()['azimuth'])
             tr['az_set'] = round(t.at(t.start+t.duration())['azimuth'])
+
+            # status_string, perc = self.get_amsat_status(sat_name)
+            tr['status'] = self.get_amsat_status(sat_name)
+
             passes.append(tr)
 
         return passes
+
+    def get_above_horizon_el_az(self, qth):
+
+        self.update_tle()
+
+        qth = GridToCoords().get(qth)
+
+        o = {}
+        for sat in self.sats.keys():
+            info = predict.observe(self.get_tle(sat), qth)
+            if info['elevation'] >= 0:
+                o[sat] = [round(info['elevation'], 1), round(info['azimuth'], 1)]
+        return o
 
     def update_tle(self):
         if time.time() - self.tle_last_update < self.tle_max_age:
             return
 
+        print("Updating TLE")
         self.tle = []
 
         for rt in [requests.get(url).content.decode() for url in self.tle_urls]:
@@ -102,6 +125,36 @@ class Predictor:
         self.tle_last_update = time.time()
 
     def get_tle(self, sat_name):
-        self.update_tle()
         i = self.tle.index(sat_name)
         return self.tle[i:i+3]
+
+    def get_amsat_status(self, sat):
+        if 'amsat_name' in self.sats[sat]:
+            sat = self.sats[sat]['amsat_name']
+
+        if sat in self.amsat_status_cache:
+            return self.amsat_status_cache[sat]
+        else:
+            return "No data"
+
+    def update_amsat_status(self):
+        if time.time() - self.amsat_status_last_update < self.amsat_status_max_age:
+            return
+
+        print("Updating Amsat")
+
+        self.amsat_status_cache = {}
+        self.amsat_status_last_update = time.time()
+
+        symbols = {'#4169E1': '0', 'yellow': '1', 'red': '2', 'orange': '3', '#9900FF': '4', 'C0C0C0': '5'}
+
+        page_src = requests.get('https://amsat.org/status/').content
+        sat_rows = BeautifulSoup(page_src, 'html.parser').find_all('table')[2].find_all('tr')[1:]
+
+        for row in sat_rows:
+            filtered_cells = [c for c in row.find_all('td') if c.has_attr('bgcolor')]
+            colors = [cell.attrs['bgcolor'] for cell in filtered_cells]
+            satellite_name = row.find_all('td')[0].text
+            status_string = [symbols[x] for x in colors]
+
+            self.amsat_status_cache[satellite_name] = status_string

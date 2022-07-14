@@ -3,13 +3,14 @@ AO-07:
   downlink: 145.975-925
   mode: SSB
   uplink: 432.180-120
+  amsat_name: AO-7[B]
 AO-109:
   beacon: 435.750 1.2k bpsk
   downlink: 435.760-790
   mode: SSB
   uplink: 145.860-890
 AO-27:
-  beacon: ''
+  beacon: '-'
   downlink: '436.795'
   mode: FM
   uplink: '145.850'
@@ -19,15 +20,16 @@ AO-73:
   mode: SSB
   uplink: 435.130-150
 AO-91:
-  beacon: ''
+  beacon: '-'
   downlink: '145.960'
   mode: FM
   uplink: 435.250 +67Hz
 AO-92:
-  beacon: ''
+  beacon: '-'
   downlink: '145.880'
   mode: FM
   uplink: 435.350 +67Hz / 1267.350 + 67Hz
+  amsat_name: AO-92_U/v
 CAS-4A:
   beacon: '145.855'
   downlink: 145.860-880
@@ -49,22 +51,24 @@ HO-113:
   mode: SSB
   uplink: 145.855-885
 ISS:
-  beacon: ''
+  beacon: '-'
   downlink: '437.800'
   mode: FM
   uplink: 145.990 + 67Hz
+  amsat_name: ISS-FM
 JO-97:
   beacon: '145.840'
   downlink: 435.880-910
   mode: SSB
   uplink: 145.900-930
 LILACSAT-2:
-  beacon: ''
+  beacon: '-'
   downlink: '437.200'
   mode: FM
   uplink: '144.350'
+  amsat_name: LilacSat-2
 RS-44:
-  beacon: ''
+  beacon: '-'
   downlink: 435.640 MHz +/- 30 kHz
   mode: SSB
   uplink: 145.965 MHz +/- 30 kHz
