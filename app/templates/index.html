@@ -1,56 +1,64 @@
 <html>
 
-<meta http-equiv="refresh" content="59" >
+<head>
+  <title>SQ3SWF Sat Predict</title>
+</head>
 
 <style type="text/css">
-pre { margin: 3 0 0 0; display: block; border-bottom: 1px black; }
-pre:hover { background-color: #dddddd }
-.details { margin: 5 0 5 0; font-weight: bold; }
+  pre { margin: 3 0 0 0; display: block; }
+  pre:hover { background-color: #dddddd }
+  .details { margin: 5 0 5 0; font-weight: bold; display: none; }
 </style>
 
 <script>
-function show(line) {
-  var x = document.getElementById("d" + line);
-  if (x.style.display === "none") {
-	   x.style.display = "block";
-  }
-  else { x.style.display = "none"; }
-}
 
-function update_positions() {
-  det = document.getElementsByClassName('details');
-  sats = [];
-  for (i = 0; i < 5; i++) {
-    sats.push(det[i].getAttribute('sat'));
+  function generate_line(s) {
+    ll = `[${s.mode.padStart(3)}] <b>${s.name.padEnd(13)}</b> ↑${s.start_str} ↓${s.end_str} (${s.duration_str.padStart(5)}) `
+    ll += `in ${s.remaining_str}  `
+    ll += `max el: <b>${String(s.el_max).padStart(2, ' ')}</b>°`
+    ll += ` az: ${String(s.az_rise).padStart(3, '0')}-`
+    ll += `${String(s.az_peak).padStart(3, '0')}-${String(s.az_set).padStart(3, '0')}`
+    return ll
   }
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4){
-      resp = JSON.parse(xhr.responseText);
-      for (i = 0; i < 5; i++) {
-        sat_name = det[i].getAttribute('sat');
-        det[i].innerHTML = resp[sat_name];
+
+  function generate_details_line(s) {
+    ll = `         <b>DOWN:</b> ${s.downlink} <b>|</b> `
+    ll += `<b>UP:</b> ${s.uplink} <b>|</b> `
+    ll += `<b>BCN:</b> ${s.beacon}`
+    return ll
+  }
+
+  function update_positions() {
+    mainbox = document.getElementById('mainbox');
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4){
+        resp = JSON.parse(xhr.responseText);
+        for(const sat of resp) {
+          satline = document.createElement("pre");
+          satline.innerHTML = generate_line(sat);
+
+          satline_det = document.createElement("pre");
+          satline_det.innerHTML = generate_details_line(sat);
+          satline_det.setAttribute('class', 'details');
+
+          mainbox.appendChild(satline);
+          mainbox.appendChild(satline_det);
+        }
       }
+    };
+    xhr.open('GET', '/predictions?loc=JO82');
+    xhr.send();
+  }
 
-    }
-  };
-  xhr.open('GET', '/current?loc=JO82&sats='+JSON.stringify(sats)+'&');
-  xhr.send();
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-  update_positions();
-});
-
-window.setInterval(update_positions, 5000);
+  document.addEventListener("DOMContentLoaded", function() {
+    update_positions();
+  });
 
 </script>
 
-  <head>
-      <title>SQ3SWF SAT Predict</title>
-  </head>
+<body>
 
-  <body>
-    {{ content|safe }}
-  </body>
-</html>
+<div id="mainbox"></div>
+
+</body>

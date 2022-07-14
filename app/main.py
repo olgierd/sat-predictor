@@ -2,22 +2,23 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, request, render_template, send_from_directory
-import time
-import predict
-from datetime import datetime
-from dateutil import tz
 import json
-from gridtogps import GridToCoords
+import predictor
 
 app = Flask(__name__)
+
+pr = predictor.Predictor()
 
 
 @app.route('/')
 @app.route('/<locator>')
 def home(locator="JO82"):
-    pr = predict.Predict(locator)
-    pr.load_satellites('satellites.yaml')
-    return "XD"
+    return render_template("index.html")
+
+
+@app.route('/predictions')
+def satellites(locator="JO82"):
+    return json.dumps(pr.get_all_for_loc("JO82LK", 5))
 
 
 @app.route('/favicon.ico')

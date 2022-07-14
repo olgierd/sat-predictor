@@ -35,18 +35,27 @@ class Predictor:
 
     def get_all_for_loc(self, qth, n):
         if qth in self.cache and qth in self.cache_ages and time.time() - self.cache_ages[qth] < self.cache_max_age:
-            print("CACHE HIT!!!!")
-            return [q for q in self.cache[qth] if q['end'] > time.time()]
+            # cache hit, return from buffer
+            buf = [q for q in self.cache[qth] if q['end'] > time.time()]
 
-        buf = []
-        for sat in self.get_sats().keys():
-            passes = self.get_next_passes(sat, qth, n)
-            buf.extend(passes)
+        else:   # not in cache
+            buf = []
+            for sat in self.get_sats().keys():
+                passes = self.get_next_passes(sat, qth, n)
+                buf.extend(passes)
 
-        buf = sorted(buf, key=lambda d: d['start'])
+            buf = sorted(buf, key=lambda d: d['start'])
 
-        self.cache[qth] = buf
-        self.cache_ages[qth] = time.time()
+            # add to cache
+            self.cache[qth] = buf
+            self.cache_ages[qth] = time.time()
+
+        for sat_pass in buf:
+            sat_pass['remaining'] = sat_pass['start']-time.time()
+            if sat_pass['remaining'] > 0:
+                sat_pass['remaining_str'] = datetime.utcfromtimestamp(sat_pass['remaining']).strftime("%H:%M")
+            else:
+                sat_pass['remaining_str'] = "NOW"
 
         return buf
 
@@ -59,12 +68,17 @@ class Predictor:
             tr = {}
 
             tr['name'] = sat_name
+            tr['mode'] = self.sats[sat_name]['mode']
+            tr['uplink'] = self.sats[sat_name]['uplink']
+            tr['downlink'] = self.sats[sat_name]['downlink']
+            tr['beacon'] = self.sats[sat_name]['beacon']
+
             tr['start'] = t.start
             tr['end'] = t.start + t.duration()
             tr['duration'] = t.duration()
 
             tr['start_str'] = datetime.fromtimestamp(tr['start']).strftime("%H:%M")
-            tr['duration_str'] = datetime.fromtimestamp(tr['duration']).strftime("%M:%S")
+            tr['duration_str'] = datetime.utcfromtimestamp(tr['duration']).strftime("%-M:%S")
             tr['end_str'] = datetime.fromtimestamp(tr['end']).strftime("%H:%M")
 
             tr['el_max'] = round(t.peak()['elevation'])
@@ -88,5 +102,6 @@ class Predictor:
         self.tle_last_update = time.time()
 
     def get_tle(self, sat_name):
+        self.update_tle()
         i = self.tle.index(sat_name)
         return self.tle[i:i+3]
