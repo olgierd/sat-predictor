@@ -139,7 +139,7 @@ class Predictor:
         if sat in self.amsat_status_cache:
             return self.amsat_status_cache[sat]
         else:
-            return "No data"
+            return [5, 5, 5]
 
     def update_amsat_status(self):
         if time.time() - self.amsat_status_last_update < self.amsat_status_max_age:
