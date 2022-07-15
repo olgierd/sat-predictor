@@ -44,6 +44,7 @@ class Predictor:
             buf = [q for q in self.cache[qth] if q['end'] > time.time()]
 
         else:   # not in cache
+            print(f"Generating predictions for {qth}")
             buf = []
             for sat in self.sats.keys():
                 passes = self.get_next_passes(sat, qth, n)
@@ -61,6 +62,9 @@ class Predictor:
                 sat_pass['remaining_str'] = datetime.utcfromtimestamp(sat_pass['remaining']).strftime("%H:%M")
             else:
                 sat_pass['remaining_str'] = "NOW!"
+
+            if sat_pass['start'] < time.time() and time.time() < sat_pass['end']:
+                sat_pass['el_now'], sat_pass['az_now'] = self.get_current_el_az(sat_pass['name'], qth)
 
         return buf
 

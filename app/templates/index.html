@@ -18,6 +18,10 @@
     ll += `max el: <b>${String(s.el_max).padStart(2, ' ')}</b>°`
     ll += ` az: ${String(s.az_rise).padStart(3, '0')}-`
     ll += `${String(s.az_peak).padStart(3, '0')}-${String(s.az_set).padStart(3, '0')}`
+    if('el_now' in s) {
+      ll += `<b>   ↑${String(Math.round(s.el_now)).padStart(2)}°`
+      ll += ` →${String(Math.round(s.az_now)).padStart(2)}° </b>`
+    }
     return ll
   }
 
@@ -60,18 +64,28 @@
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4){
+
+        var selected = [];
+        for(const d of document.getElementsByClassName("details")) {
+          if(d.style.display == 'block') {
+            selected.push(d.id);
+          }
+        }
+
         resp = JSON.parse(xhr.responseText);
 
         var cnt = 0;
 
+        mainbox.innerHTML = '';
+
         for(const sat of resp) {
           satline = document.createElement("pre");
-          satline.id = cnt;
+          satline.id = `${sat.name}_${sat.start_str}`;
           satline.addEventListener("click", toggle_visibility, false);
           satline.innerHTML = generate_line(sat);
 
           satline_det = document.createElement("pre");
-          satline_det.id = `det_${cnt}`;
+          satline_det.id = `det_${satline.id}`;
           satline_det.innerHTML = generate_details_line(sat);
           satline_det.setAttribute('class', 'details');
           satline_det.style.display = 'none';
@@ -82,6 +96,10 @@
 
           cnt++;
         }
+
+        for(const d of selected) {
+          document.getElementById(d).style.display = 'block';
+        }
       }
     };
     xhr.open('GET', '/predictions?loc=JO82');
@@ -91,6 +109,8 @@
   document.addEventListener("DOMContentLoaded", function() {
     update_positions();
   });
+
+  window.setInterval(update_positions, 5000);
 
 </script>
 
