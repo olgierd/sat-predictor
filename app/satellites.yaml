@@ -24,12 +24,12 @@ AO-91:
   downlink: '145.960'
   mode: FM
   uplink: 435.250 +67Hz
-AO-92:
-  beacon: '-'
-  downlink: '145.880'
-  mode: FM
-  uplink: 435.350 +67Hz / 1267.350 + 67Hz
-  amsat_name: AO-92_U/v
+#AO-92:
+#  beacon: '-'
+#  downlink: '145.880'
+#  mode: FM
+#  uplink: 435.350 +67Hz / 1267.350 + 67Hz
+#  amsat_name: AO-92_U/v
 CAS-4A:
   beacon: '145.855'
   downlink: 145.860-880

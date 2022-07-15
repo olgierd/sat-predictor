@@ -30,6 +30,10 @@ class Predictor:
         with open("satellites.yaml", 'r') as f:
             self.sats = yaml.safe_load(f)
 
+        self.update_tle()
+        self.update_amsat_status()
+
+
     def get_current_el_az(self, sat_name, qth):
         qth = GridToCoords().get(qth)
         csd = predict.observe(self.get_tle(sat_name), qth)
@@ -63,9 +67,6 @@ class Predictor:
             else:
                 sat_pass['remaining_str'] = "NOW!"
 
-            if sat_pass['start'] < time.time() and time.time() < sat_pass['end']:
-                sat_pass['el_now'], sat_pass['az_now'] = self.get_current_el_az(sat_pass['name'], qth)
-
         return buf
 
     def get_next_passes(self, sat_name, qth, n):
@@ -74,6 +75,10 @@ class Predictor:
         passes = []
         for _ in range(n):
             t = next(transits)
+
+            if t.peak()['elevation'] < 1:
+                continue
+
             tr = {}
 
             tr['name'] = sat_name
@@ -87,7 +92,7 @@ class Predictor:
             tr['duration'] = t.duration()
 
             tr['start_str'] = datetime.fromtimestamp(tr['start']).strftime("%H:%M")
-            tr['duration_str'] = datetime.utcfromtimestamp(tr['duration']).strftime("%-M:%S")
+            tr['duration_str'] = datetime.utcfromtimestamp(tr['duration']).strftime("%-M")
             tr['end_str'] = datetime.fromtimestamp(tr['end']).strftime("%H:%M")
 
             tr['el_max'] = round(t.peak()['elevation'])
@@ -95,7 +100,9 @@ class Predictor:
             tr['az_peak'] = round(t.peak()['azimuth'])
             tr['az_set'] = round(t.at(t.start+t.duration())['azimuth'])
 
-            # status_string, perc = self.get_amsat_status(sat_name)
+            path = [predict.observe(self.get_tle(sat_name), qth, t.start + t.duration()*(x/10)) for x in range(11)]
+            tr['flightpath'] = [[round(x['elevation']), round(x['azimuth'])] for x in path]
+
             tr['status'] = self.get_amsat_status(sat_name)
 
             passes.append(tr)
@@ -111,8 +118,10 @@ class Predictor:
         o = {}
         for sat in self.sats.keys():
             info = predict.observe(self.get_tle(sat), qth)
+            future = predict.observe(self.get_tle(sat), qth, time.time()+10)
+            ascending = True if future['elevation'] - info['elevation'] > 0 else False
             if info['elevation'] >= 0:
-                o[sat] = [round(info['elevation'], 1), round(info['azimuth'], 1)]
+                o[sat] = {"el": round(info['elevation']), "az": round(info['azimuth']), "ascending": ascending}
         return o
 
     def update_tle(self):
@@ -139,7 +148,7 @@ class Predictor:
         if sat in self.amsat_status_cache:
             return self.amsat_status_cache[sat]
         else:
-            return [5, 5, 5]
+            return '555'
 
     def update_amsat_status(self):
         if time.time() - self.amsat_status_last_update < self.amsat_status_max_age:
@@ -159,6 +168,6 @@ class Predictor:
             filtered_cells = [c for c in row.find_all('td') if c.has_attr('bgcolor')]
             colors = [cell.attrs['bgcolor'] for cell in filtered_cells]
             satellite_name = row.find_all('td')[0].text
-            status_string = [symbols[x] for x in colors]
+            status_string = ''.join([symbols[x] for x in colors])
 
             self.amsat_status_cache[satellite_name] = status_string
