@@ -33,7 +33,6 @@ class Predictor:
         self.update_tle()
         self.update_amsat_status()
 
-
     def get_current_el_az(self, sat_name, qth):
         qth = GridToCoords().get(qth)
         csd = predict.observe(self.get_tle(sat_name), qth)
@@ -99,6 +98,11 @@ class Predictor:
             tr['az_rise'] = round(t.at(t.start)['azimuth'])
             tr['az_peak'] = round(t.peak()['azimuth'])
             tr['az_set'] = round(t.at(t.start+t.duration())['azimuth'])
+
+            if (tr['az_set'] - tr['az_rise'] > 0 and tr['az_set'] - tr['az_rise'] <180) or tr['az_set'] - tr['az_rise'] < -180:
+                tr['right'] = True
+            else:
+                tr['right'] = False
 
             path = [predict.observe(self.get_tle(sat_name), qth, t.start + t.duration()*(x/10)) for x in range(11)]
             tr['flightpath'] = [[round(x['elevation']), round(x['azimuth'])] for x in path]

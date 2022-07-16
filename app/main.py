@@ -19,7 +19,7 @@ def home(locator="JO82"):
 @app.route('/predictions')
 def satellites():
     locator = request.args.get("loc")
-    return json.dumps(pr.get_all_for_loc(locator, 5))
+    return json.dumps(pr.get_all_for_loc(locator, 7))
 
 
 @app.route('/positions')
