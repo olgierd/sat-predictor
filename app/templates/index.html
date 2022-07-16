@@ -26,7 +26,7 @@
       ll += `in ${s.remaining_str.padStart(5)}  `
     }
     ll += `↑ <b>${String(s.el_max).padStart(2, ' ')}</b>°`
-    ll += ` az: ${String(s.az_rise).padStart(3)}→${String(s.az_peak).padStart(3, '0')}→${String(s.az_set).padStart(3, '0')}°  `
+    ll += ` az: ${String(s.az_rise).padStart(3)}→${String(s.az_peak).padStart(3)}→${String(s.az_set).padStart(3)}°  `
 
     return ll
   }
