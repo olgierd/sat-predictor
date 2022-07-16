@@ -119,9 +119,10 @@ class Predictor:
         for sat in self.sats.keys():
             info = predict.observe(self.get_tle(sat), qth)
             future = predict.observe(self.get_tle(sat), qth, time.time()+10)
+            right = True if future['azimuth'] - info['azimuth'] > 0 or future['azimuth'] - info['azimuth'] < -180 else False
             ascending = True if future['elevation'] - info['elevation'] > 0 else False
             if info['elevation'] >= 0:
-                o[sat] = {"el": round(info['elevation']), "az": round(info['azimuth']), "ascending": ascending}
+                o[sat] = {"el": round(info['elevation']), "az": round(info['azimuth']), "ascending": ascending, "right": right}
         return o
 
     def update_tle(self):

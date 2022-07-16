@@ -21,10 +21,12 @@ def satellites():
     locator = request.args.get("loc")
     return json.dumps(pr.get_all_for_loc(locator, 5))
 
+
 @app.route('/positions')
 def positions():
     locator = request.args.get("loc")
     return json.dumps(pr.get_above_horizon_el_az(locator))
+
 
 @app.route('/favicon.ico')
 def favicon():

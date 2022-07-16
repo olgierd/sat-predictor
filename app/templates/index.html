@@ -11,7 +11,7 @@
   p { margin: 0; display: block; }
   pre { margin: 0; display: block; }
   pre:hover { background-color: #dddddd }
-  .details { margin: 5px 0px; }
+  .details { margin: 15px 0px; }
 </style>
 
 <script>
@@ -26,13 +26,15 @@
       ll += `in ${s.remaining_str.padStart(5)}  `
     }
     ll += `↑ <b>${String(s.el_max).padStart(2, ' ')}</b>°`
-    ll += ` az: ${az_to_letter(s.az_rise)}→${az_to_letter(s.az_peak)}→${az_to_letter(s.az_set)}  `
+    ll += ` az: ${String(s.az_rise).padStart(3)}→${String(s.az_peak).padStart(3, '0')}→${String(s.az_set).padStart(3, '0')}°  `
+
     return ll
   }
 
   function generate_pos_line(pos) {
     dir = pos['ascending'] ? '↑' : '↓';
-    ll = `<b> ${dir}${String(pos['el']).padStart(2)}° ↔${String(pos['az']).padStart(3)}° </b>`
+    right = pos['right'] ? '→' : '←';
+    ll = `<b> ${dir}${String(pos['el']).padStart(2)}° ${right}${String(pos['az']).padStart(3)}° </b>`
     return ll
   }
 
@@ -60,11 +62,9 @@
   }
 
   function generate_details_line(s) {
-    ll = ` <b>Rise</b>: ${String(s.az_rise).padStart(3, '0')}° | <b>Peak:</b> `
-    ll += `${String(s.az_peak).padStart(3, '0')}° @ ${String(s.el_max).padStart(2, ' ')}</b>° el | <b>Set:</b> ${String(s.az_set).padStart(3, '0')}°  `
-    ll += `\n <b>DOWN:</b> ${s.downlink} | `
-    ll += `<b>UP:</b> ${s.uplink} | `
-    ll += `<b>BCN:</b> ${s.beacon} | `
+    ll =  ` <b>Downlink:</b> ${s.downlink}\n`
+    ll += ` <b>Uplink:  </b> ${s.uplink} \n`
+    ll += ` <b>Beacon:  </b> ${s.beacon} \n`
     ll += ` <b>Health:</b> ${String(get_health_perc(s.status)).padStart(3)}% \n`
     ll += ` [${generate_status_colors(s.status)}]`
     return ll
@@ -93,9 +93,9 @@
 
 
     var cnt = 0;
- 
+
     mainbox.innerHTML = '';
-  
+
     for(const sat of predictions) {
       if(filter[sat.mode] == false) continue;
       satline = document.createElement("pre");
@@ -103,27 +103,27 @@
       satline.addEventListener("click", toggle_visibility, false);
       satline.innerHTML = generate_line(sat);
       satline.style.display = 'inline-block';
-    
+
       satline_pos = document.createElement("pre");
       satline_pos.id = `pos_${satline.id}`;
       satline_pos.setAttribute('class', `pos_${sat.name}`);
       satline_pos.innerHTML = ' ';
       satline_pos.style.display = 'inline-block';
-    
+
       satline_det = document.createElement("pre");
       satline_det.id = `det_${satline.id}`;
       satline_det.innerHTML = generate_details_line(sat);
       satline_det.setAttribute('class', 'details');
       satline_det.style.display = 'none';
-    
+
       p = document.createElement("p");
       p.appendChild(satline);
       p.appendChild(satline_pos);
       p.appendChild(satline_det);
       mainbox.appendChild(p);
-    
+
       cnt++;
-    }    
+    }
 
     for(const d of selected) {
       try { document.getElementById(d).style.display = 'block'; } catch(err) {}
@@ -152,10 +152,10 @@
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4){
-	
+
         resp = JSON.parse(xhr.responseText);
-        
-        
+
+
         for (const [sat, pos] of Object.entries(resp)) {
           pos_pre = document.getElementsByClassName(`pos_${sat}`);
           if(pos_pre.length >= 1) {
@@ -172,10 +172,10 @@
   function filter_changed() {
     link = event.currentTarget;
     filter[link.id] = !filter[link.id];
-    link.innerHTML = filter[link.id] ? "YES" : "NO";
+    link.innerHTML = filter[link.id] ? "YES" : " NO";
     draw_predictions();
   }
-   
+
   function update_locator() {
     let loc = prompt("Please enter your 4 or 6 characters grid locator");
     if(loc.length == 4 || loc.length == 6) {
@@ -209,6 +209,7 @@
   <pre> </pre>
   <pre>  <span style="background-color: #4169E1;"> RPT ON </span>   <span style="background-color: yellow;">TELEMETRY</span>   <span style="background-color: red;">NO SIGNAL</span>   <span style="background-color: orange;">CONFLICTING</span>   <span style="background-color: #9900FF;">ISS CREW</span> </pre>
   <pre>Activity data: amsat.org. TLE files: amsat.org celestrak.com.   </pre>
+  <pre>     Please submit your reports to amsat.org/status.   </pre>
 </div>
 
 </body>
