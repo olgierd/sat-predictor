@@ -78,7 +78,7 @@
     ll =  ` <b>Downlink:</b> ${s.downlink.padEnd(20)} <b>Rise: </b> ${start_t}\n`
     ll += ` <b>Uplink:  </b> ${s.uplink.padEnd(20)  } <b>Peak: </b> ${peak_t}\n`
     ll += ` <b>Beacon:  </b> ${s.beacon.padEnd(20)  } <b>Set:  </b> ${end_t}\n`
-    ll += ` <b>Health:</b> ${String(get_health_perc(s.status)).padStart(3)}% \n`
+    ll += ` <b>Health: </b> ${String(get_health_perc(s.status)).padStart(3)}% \n`
     ll += ` [${generate_status_colors(s.status)}]`
     return ll
   }
@@ -214,7 +214,7 @@
 
 <div id="header">
   <pre>Amateur Radio satellite predictions for <a id="locator">{{ locator }}</a>.</pre>
-  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a> | All times in <u>UTC</u>.</pre>
+  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a></pre>
   <pre> </pre>
 </div>
 <div id="mainbox"></div>
@@ -223,6 +223,7 @@
   <pre>  <span style="background-color: #4169E1;"> RPT ON </span>   <span style="background-color: yellow;">TELEMETRY</span>   <span style="background-color: red;">NO SIGNAL</span>   <span style="background-color: orange;">CONFLICTING</span>   <span style="background-color: #9900FF;">ISS CREW</span> </pre>
   <pre>Activity data: amsat.org. TLE files: amsat.org celestrak.com.   </pre>
   <pre>     Please submit your reports to amsat.org/status.   </pre>
+  <pre>    Pass times are presented in your local time zone.  </pre>
 </div>
 
 </body>
