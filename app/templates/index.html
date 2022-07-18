@@ -18,8 +18,14 @@
   filter = {'FM': true, 'SSB': true};
   predictions = {};
 
+  function timestamp_to_hhmm(ts) {
+    d = new Date(ts*1000);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+
   function generate_line(s) {
-    ll = `[${s.mode.padStart(3)}] <b>${s.name.padEnd(10)}</b> ↑${s.start_str} (${s.duration_str.padStart(2)}) `
+    start_t = timestamp_to_hhmm(s.start);
+    ll = `[${s.mode.padStart(3)}] <b>${s.name.padEnd(10)}</b> ↑${timestamp_to_hhmm(s.start)} (${s.duration_str.padStart(2)}) `
     if(s.remaining_str.includes('NOW')) {
       ll += `in <b>${s.remaining_str.padStart(5)}</b>  `
     } else {
@@ -66,9 +72,12 @@
   }
 
   function generate_details_line(s) {
-    ll =  ` <b>Downlink:</b> ${s.downlink.padEnd(20)}\n`
-    ll += ` <b>Uplink:  </b> ${s.uplink.padEnd(20)} \n`
-    ll += ` <b>Beacon:  </b> ${s.beacon.padEnd(20)} \n`
+    start_t = timestamp_to_hhmm(s.start);
+    peak_t = timestamp_to_hhmm(s.peak);
+    end_t = timestamp_to_hhmm(s.end);
+    ll =  ` <b>Downlink:</b> ${s.downlink.padEnd(20)} <b>Rise: </b> ${start_t}\n`
+    ll += ` <b>Uplink:  </b> ${s.uplink.padEnd(20)  } <b>Peak: </b> ${peak_t}\n`
+    ll += ` <b>Beacon:  </b> ${s.beacon.padEnd(20)  } <b>Set:  </b> ${end_t}\n`
     ll += ` <b>Health:</b> ${String(get_health_perc(s.status)).padStart(3)}% \n`
     ll += ` [${generate_status_colors(s.status)}]`
     return ll

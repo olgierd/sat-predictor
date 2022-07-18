@@ -87,6 +87,7 @@ class Predictor:
             tr['beacon'] = self.sats[sat_name]['beacon']
 
             tr['start'] = t.start
+            tr['peak'] = t.peak()['epoch']
             tr['end'] = t.start + t.duration()
             tr['duration'] = t.duration()
 
