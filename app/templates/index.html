@@ -66,9 +66,9 @@
   }
 
   function generate_details_line(s) {
-    ll =  ` <b>Downlink:</b> ${s.downlink}\n`
-    ll += ` <b>Uplink:  </b> ${s.uplink} \n`
-    ll += ` <b>Beacon:  </b> ${s.beacon} \n`
+    ll =  ` <b>Downlink:</b> ${s.downlink.padEnd(20)}\n`
+    ll += ` <b>Uplink:  </b> ${s.uplink.padEnd(20)} \n`
+    ll += ` <b>Beacon:  </b> ${s.beacon.padEnd(20)} \n`
     ll += ` <b>Health:</b> ${String(get_health_perc(s.status)).padStart(3)}% \n`
     ll += ` [${generate_status_colors(s.status)}]`
     return ll
@@ -205,7 +205,7 @@
 
 <div id="header">
   <pre>Amateur Radio satellite predictions for <a id="locator">{{ locator }}</a>.</pre>
-  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a></pre>
+  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a> | All times in <u>UTC</u>.</pre>
   <pre> </pre>
 </div>
 <div id="mainbox"></div>
