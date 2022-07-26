@@ -4,6 +4,7 @@
 from flask import Flask, request, render_template, send_from_directory
 import json
 import predictor
+import time
 
 app = Flask(__name__)
 
@@ -13,7 +14,12 @@ pr = predictor.Predictor()
 @app.route('/')
 @app.route('/<locator>')
 def home(locator="JO82"):
+    client_ip = request.headers.get('X-Forwarded-For')
+    if client_ip:
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
+        print(ts, locator, client_ip, flush=True)
     return render_template("index.html", locator=locator.upper())
+
 
 
 @app.route('/predictions')

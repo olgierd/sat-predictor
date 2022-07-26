@@ -47,7 +47,7 @@ EO-88:
   uplink: 435.015-045
 HO-113:
   beacon: 435.575 CW
-  downlink: 435.165-185
+  downlink: 435.165-195
   mode: SSB
   uplink: 145.855-885
 ISS:
