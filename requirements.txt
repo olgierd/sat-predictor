@@ -1,6 +1,6 @@
+pyyaml
 requests
-ephem
+pypredict
 flask
-pysqlite3
 gunicorn
-python-dateutil
+beautifulsoup4

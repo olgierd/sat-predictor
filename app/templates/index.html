@@ -1,56 +1,229 @@
+<!DOCTYPE html>
 <html>
 
-<meta http-equiv="refresh" content="59" >
+<head>
+  <title>SQ3SWF Sat Predict</title>
+</head>
 
 <style type="text/css">
-pre { margin: 3 0 0 0; display: block; border-bottom: 1px black; }
-pre:hover { background-color: #dddddd }
-.details { margin: 5 0 5 0; font-weight: bold; }
+  a { cursor: pointer; color: blue; }
+  a:hover,a.hover { text-decoration: underline; }
+  p { margin: 0; display: block; }
+  pre { margin: 0; display: block; }
+  pre:hover { background-color: #dddddd }
+  .details { margin: 15px 0px; }
 </style>
 
 <script>
-function show(line) {
-  var x = document.getElementById("d" + line);
-  if (x.style.display === "none") {
-	   x.style.display = "block";
-  }
-  else { x.style.display = "none"; }
-}
+  filter = {'FM': true, 'SSB': true};
+  predictions = {};
 
-function update_positions() {
-  det = document.getElementsByClassName('details');
-  sats = [];
-  for (i = 0; i < 5; i++) {
-    sats.push(det[i].getAttribute('sat'));
+  function timestamp_to_hhmm(ts) {
+    d = new Date(ts*1000);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4){
-      resp = JSON.parse(xhr.responseText);
-      for (i = 0; i < 5; i++) {
-        sat_name = det[i].getAttribute('sat');
-        det[i].innerHTML = resp[sat_name];
-      }
 
+  function generate_line(s) {
+    start_t = timestamp_to_hhmm(s.start);
+    ll = `[${s.mode.padStart(3)}] <b>${s.name.padEnd(10)}</b> ↑${timestamp_to_hhmm(s.start)} (${s.duration_str.padStart(2)}) `
+    if(s.remaining_str.includes('NOW')) {
+      ll += `in <b>${s.remaining_str.padStart(5)}</b>  `
+    } else {
+      ll += `in ${s.remaining_str.padStart(5)}  `
     }
-  };
-  xhr.open('GET', '/current?loc=JO82&sats='+JSON.stringify(sats)+'&');
-  xhr.send();
-}
+    ll += `↑ <b>${String(s.el_max).padStart(2, ' ')}</b>°`
+    if(s.right) {
+      ll += ` az: <u>${String(s.az_rise).padStart(3)}</u>→${String(s.az_peak).padStart(3)}→${String(s.az_set).padStart(3)}°  `
+    } else {
+      ll += ` az: ${String(s.az_set).padStart(3)}←${String(s.az_peak).padStart(3)}←<u>${String(s.az_rise).padStart(3)}</u>°  `
+    }
 
-document.addEventListener("DOMContentLoaded", function() {
-  update_positions();
-});
+    return ll
+  }
 
-window.setInterval(update_positions, 5000);
+  function generate_pos_line(pos) {
+    dir = pos['ascending'] ? '↑' : '↓';
+    right = pos['right'] ? '→' : '←';
+    ll = `<b> ${dir}${String(pos['el']).padStart(2)}° ${right}${String(pos['az']).padStart(3)}° </b>`
+    return ll
+  }
+
+  function generate_status_colors(status) {
+    colors = {0: '#4169E1', 1: 'yellow', 2: 'red', 3: 'orange', 4: '#9900FF', 5: '#C0C0C0'}
+
+    out = ""
+    for (const s of status) {
+      out += `<span style="color: ${colors[s]};">█</span>`;
+    }
+
+    return out
+  }
+
+  function get_health_perc(status) {
+    status = status.split('')
+    health = Math.round(100*status.filter(x => x === '0').length / status.filter(x => x != '5').length);
+    if(isNaN(health)) { health = 0; }
+    return health;
+  }
+
+  function az_to_letter(az) {
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.floor(((az + 22.5) % 360)/45)].padStart(2);
+  }
+
+  function generate_details_line(s) {
+    start_t = timestamp_to_hhmm(s.start);
+    peak_t = timestamp_to_hhmm(s.peak);
+    end_t = timestamp_to_hhmm(s.end);
+    ll =  ` <b>Downlink:</b> ${s.downlink.padEnd(22)} <b>Rise: </b> ${start_t}\n`
+    ll += ` <b>Uplink:  </b> ${s.uplink.padEnd(22)  } <b>Peak: </b> ${peak_t}\n`
+    ll += ` <b>Beacon:  </b> ${s.beacon.padEnd(22)  } <b>Set:  </b> ${end_t}\n`
+    ll += ` <b>Health:  </b> ${String(get_health_perc(s.status)).padEnd(3)}% \n`
+    ll += ` [${generate_status_colors(s.status)}]`
+    return ll
+  }
+
+  function toggle_visibility() {
+    obj = document.getElementById("det_" + event.currentTarget.id);
+    if(obj.style.display == 'none') {
+      obj.style.display = 'block';
+    }
+    else {
+      obj.style.display = 'none';
+    }
+  }
+
+
+  function draw_predictions() {
+
+
+    var selected = [];
+    for(const d of document.getElementsByClassName("details")) {
+      if(d.style.display == 'block') {
+        selected.push(d.id);
+      }
+    }
+
+
+    var cnt = 0;
+
+    mainbox.innerHTML = '';
+
+    for(const sat of predictions) {
+      if(filter[sat.mode] == false) continue;
+      satline = document.createElement("pre");
+      satline.id = `${sat.name}_${sat.start_str}`;
+      satline.addEventListener("click", toggle_visibility, false);
+      satline.innerHTML = generate_line(sat);
+      satline.style.display = 'inline-block';
+
+      satline_pos = document.createElement("pre");
+      satline_pos.id = `pos_${satline.id}`;
+      satline_pos.setAttribute('class', `pos_${sat.name}`);
+      satline_pos.innerHTML = ' ';
+      satline_pos.style.display = 'inline-block';
+
+      satline_det = document.createElement("pre");
+      satline_det.id = `det_${satline.id}`;
+      satline_det.innerHTML = generate_details_line(sat);
+      satline_det.setAttribute('class', 'details');
+      satline_det.style.display = 'none';
+
+      p = document.createElement("p");
+      p.appendChild(satline);
+      p.appendChild(satline_pos);
+      p.appendChild(satline_det);
+      mainbox.appendChild(p);
+
+      cnt++;
+    }
+
+    for(const d of selected) {
+      try { document.getElementById(d).style.display = 'block'; } catch(err) {}
+    }
+
+    update_positions();
+
+  }
+
+  function update_predictions() {
+    mainbox = document.getElementById('mainbox');
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4){
+
+        predictions = JSON.parse(xhr.responseText);
+        draw_predictions();
+
+      }
+    };
+    xhr.open('GET', "/predictions?loc={{locator}}");
+    xhr.send();
+  }
+
+  function update_positions() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4){
+
+        resp = JSON.parse(xhr.responseText);
+
+
+        for (const [sat, pos] of Object.entries(resp)) {
+          pos_pre = document.getElementsByClassName(`pos_${sat}`);
+          if(pos_pre.length >= 1) {
+            pos_pre[0].innerHTML = generate_pos_line(pos);
+          }
+        }
+
+      }
+    };
+    xhr.open('GET', "/positions?loc={{locator}}");
+    xhr.send();
+  }
+
+  function filter_changed() {
+    link = event.currentTarget;
+    filter[link.id] = !filter[link.id];
+    link.innerHTML = filter[link.id] ? "YES" : " NO";
+    draw_predictions();
+  }
+
+  function update_locator() {
+    let loc = prompt("Please enter your 4 or 6 characters grid locator");
+    if(loc.length == 4 || loc.length == 6) {
+      window.location.href = location.href.substring(0, location.href.lastIndexOf("/")) + "/" + loc
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    update_predictions();
+    for(const fil of document.getElementsByClassName("filter")) {
+      fil.addEventListener("click", filter_changed, false);
+    }
+    document.getElementById("locator").addEventListener("click", update_locator, false);
+
+  });
+
+  window.setInterval(update_predictions, 15000);
+  window.setInterval(update_positions, 3000);
 
 </script>
 
-  <head>
-      <title>SQ3SWF SAT Predict</title>
-  </head>
+<body>
 
-  <body>
-    {{ content|safe }}
-  </body>
-</html>
+<div id="header">
+  <pre>Amateur Radio satellite predictions for <a id="locator">{{ locator }}</a>.</pre>
+  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a></pre>
+  <pre> </pre>
+</div>
+<div id="mainbox"></div>
+<div id="footer">
+  <pre> </pre>
+  <pre>  <span style="background-color: #4169E1;"> RPT ON </span>   <span style="background-color: yellow;">TELEMETRY</span>   <span style="background-color: red;">NO SIGNAL</span>   <span style="background-color: orange;">CONFLICTING</span>   <span style="background-color: #9900FF;">ISS CREW</span> </pre>
+  <pre>Activity data: amsat.org. TLE files: amsat.org celestrak.com.   </pre>
+  <pre>     Please submit your reports to amsat.org/status.   </pre>
+  <pre>    Pass times are presented in your local time zone.  </pre>
+</div>
+
+</body>

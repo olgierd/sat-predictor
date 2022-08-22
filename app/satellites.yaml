@@ -1,0 +1,114 @@
+AO-07:
+  beacon: '145.9775'
+  downlink: 145.975-925
+  mode: SSB
+  uplink: 432.180-120
+  amsat_name: AO-7[B]
+AO-109:
+  beacon: 435.750 1.2k bpsk
+  downlink: 435.760-790
+  mode: SSB
+  uplink: 145.860-890
+AO-27:
+  beacon: '-'
+  downlink: '436.795'
+  mode: FM
+  uplink: '145.850'
+AO-73:
+  beacon: 145.935 BPSK
+  downlink: 145.950-970
+  mode: SSB
+  uplink: 435.130-150
+AO-91:
+  beacon: '-'
+  downlink: '145.960'
+  mode: FM
+  uplink: 435.250 +67Hz
+#AO-92:
+#  beacon: '-'
+#  downlink: '145.880'
+#  mode: FM
+#  uplink: 435.350 +67Hz / 1267.350 + 67Hz
+#  amsat_name: AO-92_U/v
+CAS-4A:
+  beacon: '145.855'
+  downlink: 145.860-880
+  mode: SSB
+  uplink: 435.210-230
+CAS-4B:
+  beacon: '145.910'
+  downlink: 145.915-935
+  mode: SSB
+  uplink: 435.270-290
+EO-88:
+  beacon: 145.940 BPSK
+  downlink: 145.960-990
+  mode: SSB
+  uplink: 435.015-045
+HO-113:
+  beacon: 435.575 CW
+  downlink: 435.165-195
+  mode: SSB
+  uplink: 145.855-885
+ISS:
+  beacon: '-'
+  downlink: '437.800'
+  mode: FM
+  uplink: 145.990 + 67Hz
+  amsat_name: ISS-FM
+JO-97:
+  beacon: '145.840'
+  downlink: 435.880-910
+  mode: SSB
+  uplink: 145.900-930
+LILACSAT-2:
+  beacon: '-'
+  downlink: '437.200'
+  mode: FM
+  uplink: '144.350'
+  amsat_name: LilacSat-2
+RS-44:
+  beacon: '-'
+  downlink: 435.640 MHz +/- 30 kHz
+  mode: SSB
+  uplink: 145.965 MHz +/- 30 kHz
+SO-50:
+  beacon: 435.605 CW
+  downlink: '436.795'
+  mode: FM
+  uplink: 145.850 +67Hz (74.4Hz)
+TO-108:
+  beacon: 145.910 CW
+  downlink: 145.915-935
+  mode: SSB
+  uplink: 435.270-290
+XW-2A:
+  beacon: '145.660'
+  downlink: 145.665-685
+  mode: SSB
+  uplink: 435.030-050
+XW-2B:
+  beacon: '145.705'
+  downlink: 145.730-750
+  mode: SSB
+  uplink: 435.090-110
+XW-2C:
+  beacon: '145.790'
+  downlink: 145.795-815
+  mode: SSB
+  uplink: 435.150-170
+XW-2D:
+  beacon: '145.855'
+  downlink: 145.860-880
+  mode: SSB
+  uplink: 435.210-230
+XW-2E:
+  beacon: '145.910'
+  downlink: 145.915-935
+  mode: SSB
+  uplink: 435.270-290
+XW-2F:
+  beacon: '145.975'
+  downlink: 145.980-146.000
+  mode: SSB
+  uplink: 435.330-350
