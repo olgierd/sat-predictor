@@ -15,7 +15,7 @@
 </style>
 
 <script>
-  filter = {'FM': true, 'SSB': true};
+  filter = {'FM': true, 'SSB': true, 'DIG': true};
   predictions = {};
 
   function timestamp_to_hhmm(ts) {
@@ -214,7 +214,7 @@
 
 <div id="header">
   <pre>Amateur Radio satellite predictions for <a id="locator">{{ locator }}</a>.</pre>
-  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a></pre>
+  <pre>FM: <a id="FM" class="filter">YES</a> | SSB: <a id="SSB" class="filter">YES</a> | DIG: <a id="DIG" class="filter">YES</a></pre>
   <pre> </pre>
 </div>
 <div id="mainbox"></div>
