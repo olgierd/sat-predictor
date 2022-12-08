@@ -45,12 +45,12 @@ EO-88:
   downlink: 145.960-990
   mode: SSB
   uplink: 435.015-045
-GREENCUBE:
+IO-117:
   beacon: '-'
   downlink: '435.310'
   mode: DIG
   uplink: '435.310'
-  amsat_name: GreenCube
+  # amsat_name: GreenCube
 HO-113:
   beacon: 435.575 CW
   downlink: 435.165-195
